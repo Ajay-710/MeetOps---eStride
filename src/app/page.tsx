@@ -45,8 +45,9 @@ export default function HomePage() {
   const [isConnectModalOpen, setIsConnectModalOpen] = useState(false);
   const [clientIdInput, setClientIdInput] = useState("");
   const [clientSecretInput, setClientSecretInput] = useState("");
+  const [registryProjects, setRegistryProjects] = useState<any[]>([]);
 
-  // Check Basecamp connection status on mount and handle OAuth redirect query params
+  // Check Basecamp connection status & load dynamic registry on mount
   useEffect(() => {
     const checkStatus = async () => {
       try {
@@ -61,6 +62,21 @@ export default function HomePage() {
       }
     };
     checkStatus();
+
+    const loadRegistry = async () => {
+      try {
+        const res = await fetch("/api/registry");
+        if (res.ok) {
+          const json = await res.json();
+          if (json.data?.projects) {
+            setRegistryProjects(json.data.projects);
+          }
+        }
+      } catch (e) {
+        console.warn("Could not load registry in studio:", e);
+      }
+    };
+    loadRegistry();
 
     // Check query params for OAuth return
     if (typeof window !== "undefined") {
@@ -480,6 +496,7 @@ export default function HomePage() {
                         key={item.id}
                         item={item}
                         index={idx}
+                        availableProjects={registryProjects.length > 0 ? registryProjects : undefined}
                         onUpdate={handleUpdateTask}
                         onDelete={handleDeleteTask}
                       />

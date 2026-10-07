@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { ActionItem } from "@/lib/types";
+import { ActionItem, ProjectEntity } from "@/lib/types";
 import { INITIAL_PROJECTS, FOOGO_APPROVED_LISTS, TEAM_MEMBERS } from "@/lib/defaultRegistry";
 import {
   Calendar,
@@ -20,11 +20,18 @@ import {
 interface TaskCardProps {
   item: ActionItem;
   index: number;
+  availableProjects?: ProjectEntity[];
   onUpdate: (updated: ActionItem) => void;
   onDelete: (id: string) => void;
 }
 
-export default function TaskCard({ item, index, onUpdate, onDelete }: TaskCardProps) {
+export default function TaskCard({
+  item,
+  index,
+  availableProjects = INITIAL_PROJECTS,
+  onUpdate,
+  onDelete,
+}: TaskCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
 
@@ -32,7 +39,7 @@ export default function TaskCard({ item, index, onUpdate, onDelete }: TaskCardPr
     const updated = { ...item, [field]: value };
     // If project changed, adjust routing hints
     if (field === "resolved_entity") {
-      const proj = INITIAL_PROJECTS.find((p) => p.entity_name === value);
+      const proj = availableProjects.find((p) => p.entity_name === value) || INITIAL_PROJECTS.find((p) => p.entity_name === value);
       if (proj) {
         updated.is_pipeline = proj.status === "Pipeline";
         updated.is_inactive = proj.status === "Inactive";
@@ -162,7 +169,7 @@ export default function TaskCard({ item, index, onUpdate, onDelete }: TaskCardPr
             onChange={(e) => handleFieldChange("resolved_entity", e.target.value)}
             className="w-full px-2 py-1.5 bg-background border border-charcoal dark:border-foreground font-mono text-xs text-charcoal dark:text-foreground focus:outline-none focus:ring-1 focus:ring-rust cursor-pointer"
           >
-            {INITIAL_PROJECTS.map((proj) => (
+            {availableProjects.map((proj) => (
               <option key={proj.entity_name} value={proj.entity_name}>
                 {proj.entity_name} {proj.status === "Pipeline" ? "(Pipeline)" : proj.status === "Inactive" ? "(Inactive)" : ""}
               </option>

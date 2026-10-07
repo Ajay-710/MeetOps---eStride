@@ -1,12 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { extractWithGemini, extractWithOllama, getMockExtraction } from "@/lib/aiExtractor";
 import { executeDeterministicRouting } from "@/lib/routingEngine";
-import { INITIAL_PROJECTS, INITIAL_PROJECT_ALIASES, INITIAL_MEETING_ALIASES, INITIAL_CONTACTS } from "@/lib/defaultRegistry";
+import { getRegistryData } from "@/lib/registryStore";
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { transcript, docTitle = "Meeting Transcript", model = "gemini", apiKey } = body;
+    const {
+      transcript,
+      docTitle = "Meeting Transcript",
+      model = "gemini",
+      apiKey,
+      registry: clientRegistry,
+    } = body;
 
     if (!transcript || typeof transcript !== "string") {
       return NextResponse.json({ error: "Transcript text is required." }, { status: 400 });
@@ -31,14 +37,17 @@ export async function POST(req: NextRequest) {
       extraction = getMockExtraction(docTitle);
     }
 
-    // Run Spec v1.1 Deterministic Routing Engine
+    // Read dynamic registry (from client or server store)
+    const activeRegistry = clientRegistry || getRegistryData();
+
+    // Run Deterministic Routing Engine with active registry
     const routedTasks = executeDeterministicRouting(
       extraction,
       docTitle,
-      INITIAL_PROJECTS,
-      INITIAL_PROJECT_ALIASES,
-      INITIAL_MEETING_ALIASES,
-      INITIAL_CONTACTS
+      activeRegistry.projects,
+      activeRegistry.projectAliases,
+      activeRegistry.meetingAliases,
+      activeRegistry.contacts
     );
 
     return NextResponse.json({
