@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #F5F2EB;
+  --foreground: #2F3542;
+  --card: #FFFFFF;
+  --card-foreground: #2F3542;
+}
+
+.dark {
+  --background: #121316;
+  --foreground: #F5F2EB;
+  --card: #1B1E23;
+  --card-foreground: #F5F2EB;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-inter), sans-serif;
+  overflow-x: hidden;
+}
+
+/* Paper Grid Background overlay (from Ajay's portfolio) */
+.paper-grid {
+  background-size: 32px 32px;
+  background-image: 
+    linear-gradient(to right, rgba(47, 53, 66, 0.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(47, 53, 66, 0.07) 1px, transparent 1px);
+}
+
+.dark .paper-grid {
+  background-image: 
+    linear-gradient(to right, rgba(245, 242, 235, 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(245, 242, 235, 0.06) 1px, transparent 1px);
+}
+
+/* Custom Neo-Brutalist scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--background);
+  border-left: 2px solid #2F3542;
+}
+::-webkit-scrollbar-thumb {
+  background: #2F3542;
+}
+.dark ::-webkit-scrollbar-track {
+  border-left: 2px solid #F5F2EB;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #F5F2EB;
+}
+
+/* High contrast selection */
+::selection {
+  background-color: #C84B31;
+  color: #FFFFFF;
+}
+
+/* Tactile button pressed state helper */
+.btn-brutal {
+  transition: all 0.15s ease-in-out;
+}
+.btn-brutal:hover {
+  transform: translate(-2px, -2px);
+}
+.btn-brutal:active {
+  transform: translate(2px, 2px);
+  box-shadow: none !important;
+}
