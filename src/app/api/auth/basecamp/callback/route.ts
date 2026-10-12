@@ -6,10 +6,16 @@ export async function GET(req: NextRequest) {
   const code = searchParams.get("code");
   const error = searchParams.get("error");
 
-  const host = req.headers.get("host") || "localhost:3000";
-  const protocol = host.includes("localhost") ? "http" : "https";
+  const host = req.headers.get("x-forwarded-host") || req.headers.get("host") || "localhost:3000";
+  const protocol = req.headers.get("x-forwarded-proto") || (host.includes("localhost") ? "http" : "https");
   const origin = `${protocol}://${host}`;
-  const redirectUri = process.env.BASECAMP_REDIRECT_URI || `${origin}/api/auth/basecamp/callback`;
+
+  const cookieStore = await cookies();
+  const storedRedirectUri = cookieStore.get("basecamp_oauth_redirect_uri")?.value;
+  const redirectUri =
+    storedRedirectUri ||
+    process.env.BASECAMP_REDIRECT_URI ||
+    `${origin}/api/auth/basecamp/callback`;
 
   if (error || !code) {
     return NextResponse.redirect(
@@ -58,7 +64,6 @@ export async function GET(req: NextRequest) {
     const refreshToken = tokenData.refresh_token;
 
     // Set secure cookie for Basecamp token
-    const cookieStore = await cookies();
     cookieStore.set("basecamp_access_token", accessToken, {
       path: "/",
       httpOnly: true,
@@ -76,6 +81,9 @@ export async function GET(req: NextRequest) {
         sameSite: "lax",
       });
     }
+
+    // Clean up temporary OAuth cookie
+    cookieStore.delete("basecamp_oauth_redirect_uri");
 
     return NextResponse.redirect(`${origin}/?basecamp_connected=true`);
   } catch (err: any) {

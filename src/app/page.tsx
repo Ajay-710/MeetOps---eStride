@@ -103,10 +103,9 @@ export default function HomePage() {
 
   // Initiate OAuth redirect
   const handleInitiateOAuth = () => {
-    if (hasServerOAuthConfig) {
-      window.location.href = "/api/auth/basecamp";
-    } else {
-      setIsConnectModalOpen(true);
+    if (typeof window !== "undefined") {
+      const redirectUri = `${window.location.origin}/api/auth/basecamp/callback`;
+      window.location.href = `/api/auth/basecamp?redirect_uri=${encodeURIComponent(redirectUri)}`;
     }
   };
 
@@ -602,9 +601,10 @@ export default function HomePage() {
                     alert("Please provide your Basecamp Client ID.");
                     return;
                   }
+                  const redirectUri = `${window.location.origin}/api/auth/basecamp/callback`;
                   window.location.href = `/api/auth/basecamp?client_id=${encodeURIComponent(
                     clientIdInput
-                  )}`;
+                  )}&redirect_uri=${encodeURIComponent(redirectUri)}`;
                 }}
                 className="flex items-center gap-1.5 px-4 py-2 bg-rust text-white border-2 border-charcoal font-mono text-xs font-bold uppercase tracking-wider shadow-[2px_2px_0px_#2F3542] hover:translate-x-0.5 hover:translate-y-0.5 cursor-pointer"
               >
